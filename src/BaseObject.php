@@ -7,8 +7,16 @@ namespace chorus;
  * ----------
  * @author Verdient。
  */
-class BaseObject implements Configurable
+class BaseObject implements Configurable, EventInterface
 {
+	/**
+	 * @var Array $_events
+	 * 挂载的事件
+	 * -------------------
+	 * @author Verdient。
+	 */
+	protected $_events = [];
+
 	/**
 	 * __construct([Array $config = []])
 	 * 构造函数
@@ -119,5 +127,78 @@ class BaseObject implements Configurable
 	 */
 	public function __call($name, $params){
 		throw new UnknownMethodException('Calling unknown method: ' . get_class($this) . "::$name()");
+	}
+
+	/**
+	 * on(String $name, Callable $handler[, Boolean $append = true])
+	 * 挂载事件
+	 * -------------------------------------------------------------
+	 * @param String $name 事件名称
+	 * @param Callable $handler 处理器
+	 * @param Boolean $append 是否添加到队列头部
+	 * --------------------------------------
+	 * @author Verdient。
+	 */
+	public function on($name, $handler, $append = true){
+		if(!isset($this->_events[$name])){
+			$this->_events[$name] = [];
+		}
+		if($append !== true){
+			array_unshift($this->_events[$name], $handler);
+		}else{
+			$this->_events[$name][] = $handler;
+		}
+		return $this;
+	}
+
+	/**
+	 * off(String $name, Callable $handler)
+	 * 卸载事件
+	 * ------------------------------------
+	 * @param String $name 事件名称
+	 * @param Callable $handler 处理器
+	 * ------------------------------
+	 * @author Verdient。
+	 */
+	public function off($name, $handler){
+		if(isset($this->_events[$name])){
+			foreach($this->_events[$name] as $index => $value){
+				if($value === $handler){
+					unset($this->_events[$name][$index]);
+				}
+			}
+			$this->_events[$name] = array_values($this->_events[$name]);
+		}
+		return $this;
+	}
+
+	/**
+	 * offAll(String $name)
+	 * 卸载事件
+	 * --------------------
+	 * @param String $name 事件名称
+	 * ---------------------------
+	 * @author Verdient。
+	 */
+	public function offAll($name){
+		$this->_events = [];
+		return $this;
+	}
+
+	/**
+	 * trigger(String $name, Mixed ...$args)
+	 * 触发事件
+	 * -------------------------------------
+	 * @param String $name 事件名称
+	 * ---------------------------
+	 * @author Verdient。
+	 */
+	public function trigger($name, ...$args){
+		if(isset($this->_events[$name])){
+			foreach($this->_events[$name] as $handler){
+				call_user_func($handler, ...$args);
+			}
+		}
+		return $this;
 	}
 }
