@@ -58,10 +58,16 @@ class BaseObject implements Configurable, EventInterface
 		$setter = 'set' . $name;
 		if(method_exists($this, $setter)){
 			$this->$setter($value);
-		}else if(method_exists($this, 'get' . $name)){
-			throw new InvalidCallException('Setting read-only property: ' . get_class($this) . '::' . $name);
 		}else{
-			throw new UnknownPropertyException('Setting unknown property: ' . get_class($this) . '::' . $name);
+			if(method_exists($this, 'get' . $name)){
+				$exception = new InvalidCallException('Setting read-only property: ' . get_class($this) . '::' . $name);
+			}else{
+				$exception = new UnknownPropertyException('Setting unknown property: ' . get_class($this) . '::' . $name);
+			}
+			$debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+			$exception->setFile($debug['file']);
+			$exception->setLine($debug['line']);
+			throw $exception;
 		}
 	}
 
@@ -79,10 +85,17 @@ class BaseObject implements Configurable, EventInterface
 		$getter = 'get' . $name;
 		if(method_exists($this, $getter)){
 			return $this->$getter();
-		}elseif (method_exists($this, 'set' . $name)){
-			throw new InvalidCallException('Getting write-only property: ' . get_class($this) . '::' . $name);
+		}else{
+			if(method_exists($this, 'set' . $name)){
+				$exception = new InvalidCallException('Getting write-only property: ' . get_class($this) . '::' . $name);
+			}else{
+				$exception = new UnknownPropertyException('Getting unknown property: ' . get_class($this) . '::' . $name);
+			}
+			$debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+			$exception->setFile($debug['file']);
+			$exception->setLine($debug['line']);
+			throw $exception;
 		}
-		throw new UnknownPropertyException('Getting unknown property: ' . get_class($this) . '::' . $name);
 	}
 
 	/**
@@ -103,9 +116,11 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * __unset($name)
+	 * __unset(String $name)
 	 * 移除元素
-	 * --------------
+	 * ---------------------
+	 * @param String $name 名称
+	 * ------------------------
 	 * @throws InvalidCallException
 	 * @author Verdient。
 	 */
@@ -114,7 +129,11 @@ class BaseObject implements Configurable, EventInterface
 		if(method_exists($this, $setter)){
 			$this->$setter(null);
 		}elseif(method_exists($this, 'get' . $name)){
-			throw new InvalidCallException('Unsetting read-only property: ' . get_class($this) . '::' . $name);
+			$exception = new InvalidCallException('Unsetting read-only property: ' . get_class($this) . '::' . $name);
+			$debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+			$exception->setFile($debug['file']);
+			$exception->setLine($debug['line']);
+			throw $exception;
 		}
 	}
 
@@ -126,7 +145,11 @@ class BaseObject implements Configurable, EventInterface
 	 * @author Verdient。
 	 */
 	public function __call($name, $params){
-		throw new UnknownMethodException('Calling unknown method: ' . get_class($this) . "::$name()");
+		$debug = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 1)[0];
+		$exception = new UnknownMethodException('Call to unknown method: ' . get_class($this) . "::$name()");
+		$exception->setFile($debug['file']);
+		$exception->setLine($debug['line']);
+		throw $exception;
 	}
 
 	/**
