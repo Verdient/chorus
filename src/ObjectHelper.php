@@ -18,16 +18,16 @@ class ObjectHelper
 	 * @return Object
 	 * @author Verdient。
 	 */
-	public static function create($type){
+	public static function create($type, ...$args){
 		$class = null;
 		if(is_string($type)){
-			return new $type;
+			return new $type([], ...$args);
 		}
 		if(is_array($type)){
 			if(isset($type['class'])){
 				$class = $type['class'];
 				unset($type['class']);
-				return new $class($type);
+				return new $class($type, ...$args);
 			}
 		}
 		throw new \Exception('Object configuration must be an array containing a "class" element.');

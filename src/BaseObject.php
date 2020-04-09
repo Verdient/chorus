@@ -10,19 +10,14 @@ namespace chorus;
 class BaseObject implements Configurable, EventInterface
 {
 	/**
-	 * @var Array $_events
-	 * 挂载的事件
-	 * -------------------
+	 * @var array 挂载的事件
 	 * @author Verdient。
 	 */
 	protected $_events = [];
 
 	/**
-	 * __construct([Array $config = []])
 	 * 构造函数
-	 * ---------------------------------
-	 * @param Array $config 配置信息
-	 * ----------------------------
+	 * @param array $config 配置信息
 	 * @author Verdient。
 	 */
 	public function __construct($config = []){
@@ -35,22 +30,19 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * init()
 	 * 初始化
-	 * ------
 	 * @author Verdient。
 	 */
 	public function init(){
-
+		foreach($this->events() as $event => $handler){
+			$this->on($event, is_string($handler) ? [$this, $handler] : $handler);
+		}
 	}
 
 	/**
-	 * __set(String $name, Mixed $value)
 	 * 设置属性
-	 * ---------------------------------
-	 * @param String $name 名称
-	 * @param Mixed $value 内容
-	 * ------------------------
+	 * @param string $name 名称
+	 * @param mixed $value 内容
 	 * @throws InvalidCallException|UnknownPropertyException
 	 * @author Verdient。
 	 */
@@ -72,13 +64,10 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * __get(String $name)
 	 * 获取属性
-	 * -------------------
-	 * @param String $name 名称
-	 * ------------------------
+	 * @param string $name 名称
 	 * @throws InvalidCallException|UnknownPropertyException
-	 * @return Mixed
+	 * @return mixed
 	 * @author Verdient。
 	 */
 	public function __get($name){
@@ -99,12 +88,9 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * __isset(String $name)
 	 * 是否存在
-	 * ---------------------
-	 * @param String $name 名称
-	 * ------------------------
-	 * @return Boolean
+	 * @param string $name 名称
+	 * @return bool
 	 * @author Verdient。
 	 */
 	public function __isset($name){
@@ -116,11 +102,8 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * __unset(String $name)
 	 * 移除元素
-	 * ---------------------
-	 * @param String $name 名称
-	 * ------------------------
+	 * @param string $name 名称
 	 * @throws InvalidCallException
 	 * @author Verdient。
 	 */
@@ -138,9 +121,7 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * __call()
 	 * 调用成员方法
-	 * ----------
 	 * @throws UnknownMethodException
 	 * @author Verdient。
 	 */
@@ -153,13 +134,10 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * on(String $name, Callable $handler[, Boolean $append = true])
 	 * 挂载事件
-	 * -------------------------------------------------------------
-	 * @param String $name 事件名称
-	 * @param Callable $handler 处理器
-	 * @param Boolean $append 是否添加到队列头部
-	 * --------------------------------------
+	 * @param string $name 事件名称
+	 * @param callback $handler 处理器
+	 * @param bool $append 是否添加到队列尾部
 	 * @author Verdient。
 	 */
 	public function on($name, $handler, $append = true){
@@ -175,12 +153,9 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * off(String $name, Callable $handler)
 	 * 卸载事件
-	 * ------------------------------------
-	 * @param String $name 事件名称
-	 * @param Callable $handler 处理器
-	 * ------------------------------
+	 * @param string $name 事件名称
+	 * @param callback $handler 处理器
 	 * @author Verdient。
 	 */
 	public function off($name, $handler){
@@ -196,11 +171,8 @@ class BaseObject implements Configurable, EventInterface
 	}
 
 	/**
-	 * offAll(String $name)
 	 * 卸载事件
-	 * --------------------
-	 * @param String $name 事件名称
-	 * ---------------------------
+	 * @param string $name 事件名称
 	 * @author Verdient。
 	 */
 	public function offAll($name){
@@ -223,5 +195,14 @@ class BaseObject implements Configurable, EventInterface
 			}
 		}
 		return $this;
+	}
+
+	/**
+	 * 事件配置
+	 * @return array
+	 * @author Verdient。
+	 */
+	public function events(){
+		return [];
 	}
 }
