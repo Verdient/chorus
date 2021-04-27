@@ -1,10 +1,11 @@
 <?php
+
+declare(strict_types=1);
+
 namespace chorus;
 
 /**
- * UnknownClassException
  * 未知类异常
- * ---------------------
  * @author Verdient。
  */
 class UnknownClassException extends LogicException
